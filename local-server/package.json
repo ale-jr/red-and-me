@@ -1,0 +1,33 @@
+{
+  "name": "local-server",
+  "version": "0.0.1",
+  "description": "red-and-me local server",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ale-jr/red-and-me.git"
+  },
+  "keywords": [
+    "blue-and-me",
+    "fiat",
+    "fiat-500"
+  ],
+  "author": "Alexandre Fernandes Junior",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ale-jr/red-and-me/issues"
+  },
+  "homepage": "https://github.com/ale-jr/red-and-me#readme",
+  "dependencies": {
+    "@fastify/static": "^6.11.2",
+    "@fastify/websocket": "^8.2.0",
+    "@serialport/parser-readline": "^12.0.0",
+    "fastify": "^4.23.2",
+    "serialport": "^12.0.0",
+    "uuid": "^9.0.1"
+  }
+}
