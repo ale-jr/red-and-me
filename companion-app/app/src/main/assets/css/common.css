@@ -1,0 +1,146 @@
+:root,
+html[data-theme='light'] {
+    --card-bg: #ffffff;
+
+    --divider: #1e2124;
+
+    --pill: #656769;
+    --pill-inverse: #ffffff;
+
+    --header-bg: #bbbcbd;
+    --header-text: #343739;
+
+
+    --card-warning-bg: #fff3cd;
+    --card-warning-text: #664d03;
+
+}
+
+html[data-theme='dark'] {
+    --card-bg: #1e2124;
+
+    --divider: #ffffff;
+
+    --pill: #ffffff;
+    --pill-inverse: #1e2124;
+
+    --header-bg: #343739;
+    --header-text: #bbbcbd;
+
+
+    --card-warning-bg: #332701;
+    --card-warning-text: #ffda6a;
+}
+
+.card {
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+    padding: 16px;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+    text-decoration: none;
+}
+
+.card-warning {
+    border: 1px solid var(--card-warning-text);
+    background-color: var(--card-warning-bg);
+    color: var(--card-warning-text);
+    box-shadow: none;
+}
+
+.card-title {
+    font-size: 1.8rem;
+    font-weight: 500;
+    width: 100%;
+    margin: 0;
+    border-bottom: 1px solid var(--divider);
+    padding-bottom: 0.25rem;
+}
+
+.card-title i {
+    margin-right: 0.25rem;
+}
+
+.card ul {
+    margin: 0;
+    padding: 0;
+
+}
+
+.card li {
+    list-style-type: none;
+    font-size: 1.4rem;
+}
+
+.card ul.list-buttons {
+    margin-top: 0.75rem;
+    width: 100%;
+}
+
+.card ul.list-buttons button,
+.card ul.list-buttons a {
+    all: unset;
+    width: 100%;
+    cursor: pointer;
+}
+
+.card ul.list-buttons button:active,
+.card ul.list-buttons button:hover {
+    color: var(--text-800);
+}
+
+.card ul.list-buttons li:not(:last-child) {
+    margin-bottom: 0.75rem;
+}
+
+
+.card ul.list-buttons li {
+    width: 100%;
+}
+
+.card-button {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+
+    font-size: 1.8rem;
+    font-weight: 400;
+    border: none;
+    cursor: pointer;
+    color: var(--text-900);
+}
+
+.card-button:hover {
+    color: var(--text-800);
+}
+
+.card-button i {
+    margin-right: 0.5rem;
+}
+
+
+.pills {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.pill {
+    all: unset;
+    cursor: pointer;
+    border-radius: 500px;
+    border: 1px solid var(--pill);
+    padding: 0.25rem 0.5rem;
+    color: var(--pill);
+    background: var(--pill-inverse);
+}
+
+.pill.active {
+    color: var(--pill-inverse);
+    background: var(--pill);
+
+}

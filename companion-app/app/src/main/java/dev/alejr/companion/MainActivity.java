@@ -1,0 +1,50 @@
+package dev.alejr.companion;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.View;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
+public class MainActivity extends AppCompatActivity {
+
+    private  WebView webView = null;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        this.webView = (WebView) findViewById(R.id.webview);
+        WebSettings webSettings = webView.getSettings();
+
+        webSettings.setJavaScriptEnabled(true);
+
+        webView.setWebChromeClient(new WebChromeClient());
+        webSettings.setLoadsImagesAutomatically(true);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
+        webSettings.setDomStorageEnabled(true);
+
+
+        webView.setWebViewClient(new WebViewClientWithIntents(this));
+        //webView.loadUrl("http://192.168.15.28:3000/index.html");
+        webView.loadUrl("file:///android_asset/app.html");
+        webView.setWebContentsDebuggingEnabled(true);
+        webView.addJavascriptInterface(new WebViewInterface(this),"Android");
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && this.webView.canGoBack()) {
+            this.webView.goBack();
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+}
