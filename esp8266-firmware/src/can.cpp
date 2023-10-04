@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <debug.h>
 #include <carState.h>
+#include <watchdog.h>
 
 #define CAN0_INT D4
 #define CAN0_CS D3
@@ -43,6 +44,7 @@ void canLoop()
     CanMessage message = {};
     CAN0.readMsgBuf(&message.id, &message.length, message.buffer);
     handleId(message.id);
+    keepAlive();
     if (getDebugMode())
         handleMessageInDebugMode(message);
     else
