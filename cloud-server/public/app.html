@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='css/fonts.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='css/common.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='css/app.css'>
+    <link href="assets/font-awesome/css/fontawesome.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/brands.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/solid.css" rel="stylesheet">
+    <script type="module" src='js/app.js'></script>
+</head>
+
+<body>
+    <p style="color:red;" id="error-text" class="hidden"></p>
+    <div id="login-section" class="hidden">
+        <label>
+            email:
+            <input id="email-input" type="email" />
+        </label>
+        <label>
+            senha:
+            <input id="password-input" type="password" />
+        </label>
+
+        <button id="login-btn" type="submit">login</button>
+    </div>
+    <main class="hidden">
+
+        <div class="backdrop hidden" id="route-modal-backdrop"></div>
+        <div class="modal modal-full hidden" id="route-modal">
+            <button class="modal-close">&times;</button>
+            <div class="modal-header">
+                Busca de rotas
+            </div>
+            <div class="modal-body">
+                <div class="search-input">
+                    <div class="inputs">
+                        <input type="text" id="query-input" placeholder="Endereço ou lugar" />
+                        <label>
+                            <input type="checkbox" id="is-place-checkbox" />
+                            buscar por endereço
+                        </label>
+                    </div>
+                    <button id="submit-query" class="icon-button">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+                <div id="results-section">
+                    <p>Resultados:</p>
+                    <ul class="route-list">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        </section>
+        <section class="card">
+            <p class="card-title">
+                <span>Rotas planejadas</span>
+                <button class="icon-button" id="open-route-planning-modal">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </p>
+            <ul class="list-buttons route-planning" id="route-plannings-list">
+            </ul>
+        </section>
+    </main>
+
+</body>
+
+</html>
