@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("loaded");
   const hasCredentials = localStorage.getItem("credentials");
   const loginSection = document.querySelector("#login-section");
   const mainSection = document.querySelector("main");

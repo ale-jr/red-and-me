@@ -8,7 +8,6 @@ export const verifyAuth = async (request, response, next) => {
     throw new Error("invalid user");
   }
   request.user = user;
-  console.log("user", user);
 };
 
 export const authenticationRoutes = (fastify, opts, done) => {
@@ -16,7 +15,6 @@ export const authenticationRoutes = (fastify, opts, done) => {
     const { email, password } = req.body;
     const user = authentication.verifyUser(email, password);
     if (!user) {
-      console.log("here");
       res.code(403).send({
         status: "error",
         message: "invalid user and/or password",
