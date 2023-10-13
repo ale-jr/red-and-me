@@ -1,155 +1,148 @@
 :root,
-html[data-theme='light'] {
-    --bg: #F3F6F9;
-    --text-900: #383c3f;
-    --text-800: #5f6265;
+html[data-theme="light"] {
+  --bg: #f3f6f9;
+  --text-900: #383c3f;
+  --text-800: #5f6265;
 }
 
-html[data-theme='dark'] {
-    --bg: #424549;
-    --text-900: #fff;
-    --text-800: #cccccc;
+html[data-theme="dark"] {
+  --bg: #424549;
+  --text-900: #fff;
+  --text-800: #cccccc;
 }
 
 html,
 body {
-    height: 100%;
-    background-color: var(--bg);
+  height: 100%;
+  background-color: var(--bg);
 }
 
 body {
-    display: flex;
-    flex-direction: column;
-
+  display: flex;
+  flex-direction: column;
 }
 
 main {
-    background-color: var(--bg);
-    flex-grow: 1;
+  background-color: var(--bg);
+  flex-grow: 1;
 }
-
-
-
 
 body {
-    background-color: var(--bg);
-    font-family: "Roboto";
-    color: var(--text-900);
-    padding: 0;
-    margin: 0;
-}
-
-
-header {
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  background-color: var(--bg);
+  font-family: "Roboto";
+  color: var(--text-900);
+  padding: 0;
+  margin: 0;
 }
 
 main {
-    padding: 12px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    box-sizing: border-box;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  box-sizing: border-box;
 }
 
 .col {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+navigation-widget {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 @media screen and (max-width: 600px) {
-    main {
-        display: flex;
-        flex-direction: column;
-    }
+  main {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
-
 #status-card {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
 #status-card .speed {
-    font-size: 5rem;
-    margin: 0;
-    font-weight: 700;
-    line-height: 80%;
+  font-size: 5rem;
+  margin: 0;
+  font-weight: 700;
+  line-height: 80%;
 }
 
 #status-card .unit {
-    font-size: 1.2rem;
-    font-weight: 500;
-    margin: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin: 0;
 }
 
 #fuel-card {
-    padding: 1rem 0;
+  padding: 1rem 0;
 }
 
 #fuel-card ul {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #fuel-card li {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    font-size: 2rem;
-    font-weight: 500;
-    flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 2rem;
+  font-weight: 500;
+  flex-grow: 1;
 }
 
 #fuel-card li span {
-    line-height: 80%;
-    margin-top: 0.5rem;
+  line-height: 80%;
+  margin-top: 0.5rem;
 }
 
 #fuel-card li small {
-    font-size: 1rem;
-    font-weight: 400;
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 #fuel-card li i {
-    font-size: 1.5rem;
+  font-size: 1.5rem;
 }
 
 #clock-card {
-    gap: 0.25rem;
-    align-items: center;
+  gap: 0.25rem;
+  align-items: center;
+  user-select: none;
 }
 
 #clock-card .time {
-    margin: 0;
-    font-size: 3rem;
-    font-weight: 500;
+  margin: 0;
+  font-size: 3rem;
+  font-weight: 500;
 }
 
 #clock-card .date {
-    margin: 0;
-    font-size: 1.3rem;
-    
+  margin: 0;
+  font-size: 1.3rem;
 }
 
 #clock-card .weather {
-    margin: 0;
-    font-size: 2rem;
+  margin: 0;
+  font-size: 2rem;
 }
 
 #clock-card .weather small {
-    font-size: 1.2rem;
+  font-size: 1.2rem;
 }
 
 #issues-card {
-    font-size: 1rem;
+  font-size: 1rem;
 }

@@ -137,10 +137,10 @@ const loadCamera = (stream) => {
    * @param {*} p5
    */
   const sketch = (p5) => {
-    const cameraVideo = p5.createCapture("video");
-    cameraVideo.size(720, 480);
-    cameraVideo.hide();
-    cameraVideo.elt.srcObject = stream;
+    // const cameraVideo = p5.createCapture("video");
+    // cameraVideo.size(720, 480);
+    // cameraVideo.hide();
+    // cameraVideo.elt.srcObject = stream;
 
     p5.setup = () => {
       const canvas = p5.createCanvas(720, 480);
@@ -150,7 +150,7 @@ const loadCamera = (stream) => {
     };
 
     p5.draw = () => {
-      p5.image(cameraVideo, 0, 0, 720, 480);
+      // p5.image(cameraVideo, 0, 0, 720, 480);
       p5.ellipse(50, 50, 80, 80);
     };
   };

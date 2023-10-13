@@ -78,7 +78,7 @@ export const navigation = [
     },
     {
         icon: "fa-solid fa-hospital",
-        title: "Hospital node de Julho",
+        title: "Hospital Nove de Julho",
         latitude: "-23.559331",
         longitude: "-46.655782"
     }
