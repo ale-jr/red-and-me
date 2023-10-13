@@ -49,4 +49,22 @@ export const KEYS = {
   mute: 164,
 };
 
-export const tabletConnection = createTabletConnection();
+const createTableConnectionMock = () => {
+  return {
+    isConnected: () => true,
+    connect: () => {
+      console.log("adb mock connected");
+    },
+    disconnect: () => {
+      console.log("adb mock disconnected");
+    },
+    sendKey: (key) => {
+      console.log(`adb mock send key ${key}`);
+    },
+  };
+};
+
+export const tabletConnection =
+  process.env.NODE_ENV === "production"
+    ? createTabletConnection()
+    : createTableConnectionMock();

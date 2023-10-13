@@ -210,4 +210,12 @@ export const parseSerialMessage = (message, header) => {
   return parsed;
 };
 
-export const carConnection = createCarConnection();
+const createCarConnectionMock = () => ({
+  sendMessage: (message) => console.log("send message mock", message),
+  handleData: (data) => console.log("handle data mock", data),
+});
+
+export const carConnection =
+  process.env.NODE_ENV === "production"
+    ? createCarConnection()
+    : createCarConnectionMock();
