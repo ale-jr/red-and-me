@@ -4,6 +4,7 @@ import "./components/NavigationWidget/index.js";
 import "./components/SettingsModal.js";
 import "./components/NavigationItem.js";
 import "./components/SpotifyWidget.js";
+import "./components/CarStatusWidget.js";
 import { createWebsocket } from "./services/websocket.js";
 import { LOG_LEVEL, log } from "./services/log.js";
 import { WS_MESSAGE, WS_SEND_MESSAGE } from "./consts/events.js";

@@ -31,12 +31,12 @@ ${styleTags}
         gap: 8px;
     }
 
-    .track-info .track{
+    .track-info #track{
         font-size: 1.2rem;
         margin:0;
         text-overflow: ellipsis
     }
-    .track-info .artist{
+    .track-info #artist{
         font-size: 1rem;
         margin:0;
         text-overflow: ellipsis
@@ -46,23 +46,23 @@ ${styleTags}
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 24px;
+        gap: 53px;
     }
 
     .controls .icon-button{
-        font-size: 32px;
+        font-size: 42px;
     }
 
     .controls .icon-button#play-pause{
-        font-size: 48px;
+        font-size: 56px;
     }
 </style>
 <div class="card">
-    <img src="https://images.genius.com/bcd2aca59efcbefe872757c7412a475f.1000x1000x1.jpg"/>
+    <img id="cover" src="assets/img/spotify-logo.png"/>
     <div class="container">
         <div class="track-info">
-            <p class="track">Supercut</p>
-            <p class="artist">Lorde</p>
+            <p id="track">Spotify</p>
+            <p id="artist"></p>
         </div>
         <div class="controls">
             <button class="icon-button" id="previous">
@@ -89,10 +89,53 @@ class SpotifyWidget extends HTMLElement {
   }
 
   connectedCallback() {
-    this.shadowRoot.addEventListener("click", (event) => {
-      if (["BUTTON", "I"].includes(event.target.tagName)) return;
+    this.shadowRoot.querySelector("#cover").addEventListener("click", (event) => {
       this.openSpotify();
     });
+
+    window.addEventListener("message", (event) => {
+      if (typeof event.data !== "string" || !event.data.includes("|")) return;
+      const [type, value] = event.data.split("|");
+
+      switch (type) {
+        case "trackName":
+          this.shadowRoot.querySelector("#track").innerText = value;
+          break;
+        case "trackArtist":
+          this.shadowRoot.querySelector("#artist").innerText = value;
+          break;
+        case "trackCover":
+          this.shadowRoot.querySelector("#cover").src = value;
+          break;
+        case "isPaused":
+          this.shadowRoot.querySelector("#play-pause").innerHTML =
+            value === "true"
+              ? `<i class="fa-solid fa-play"></i>`
+              : `<i class="fa-solid fa-pause"></i>`;
+          this.shadowRoot
+            .querySelector("#play-pause")
+            .setAttribute("data-paused", value);
+      }
+    });
+
+    this.shadowRoot.querySelector("#play-pause").addEventListener("click",()=>{
+        const isPaused = this.shadowRoot.querySelector("#play-pause").getAttribute("data-paused") === "true"
+        if(isPaused){
+            Android?.resumeMusic()
+        }
+        else{
+            Android?.pauseMusic()
+        }
+    })
+
+    this.shadowRoot.querySelector("#previous").addEventListener("click",() => {
+        Android?.previousMusic()
+    })
+
+
+    this.shadowRoot.querySelector("#next").addEventListener("click",() => {
+        Android?.nextMusic()
+    })
   }
 
   openSpotify() {

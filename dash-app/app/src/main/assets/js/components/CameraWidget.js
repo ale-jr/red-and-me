@@ -24,8 +24,8 @@ ${styleTags}
     font-size: 2rem;
     font-weight: bolder;
     position: fixed;
-    top: -1.5rem;
-    right: -1.5rem;
+    top: -1rem;
+    right: -1rem;
   }
 
   .backdrop {
@@ -47,7 +47,8 @@ ${styleTags}
   }
 
   #camera-stream {
-    height: 90vh;
+    max-height: 85vh;
+    max-width: 90vw;
   }
 
   #camera-overlay {
@@ -142,20 +143,20 @@ class CameraWidget extends HTMLElement {
      */
     const canvas = this.shadowRoot.querySelector("#camera-overlay");
 
-    setTimeout(() => {
-      canvas.width = videoElement.clientWidth;
-      canvas.height = videoElement.clientHeight;
+    // setTimeout(() => {
+    //   canvas.width = videoElement.clientWidth;
+    //   canvas.height = videoElement.clientHeight;
 
-      const ctx = canvas.getContext("2d");
+    //   const ctx = canvas.getContext("2d");
 
-      ctx.strokeStyle = "red";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
+    //   ctx.strokeStyle = "red";
+    //   ctx.lineWidth = 3;
+    //   ctx.beginPath();
+    //   ctx.moveTo(0, 0);
 
-      ctx.lineTo(100, 100);
-      ctx.stroke();
-    }, 100);
+    //   ctx.lineTo(100, 100);
+    //   ctx.stroke();
+    // }, 100);
   }
 
   showCamera() {
