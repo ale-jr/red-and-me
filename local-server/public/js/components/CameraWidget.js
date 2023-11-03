@@ -1,3 +1,4 @@
+import { DEFAULT_CAMERA_SETTINGS } from "../consts/camera.js";
 import { WS_MESSAGE, WS_SEND_MESSAGE } from "../consts/events.js";
 import { styleTags } from "../consts/styles.js";
 import { LOG_LEVEL, log } from "../services/log.js";
@@ -24,8 +25,8 @@ ${styleTags}
     font-size: 2rem;
     font-weight: bolder;
     position: fixed;
-    top: -1.5rem;
-    right: -1.5rem;
+    top: -1rem;
+    right: -1rem;
   }
 
   .backdrop {
@@ -46,10 +47,6 @@ ${styleTags}
     width: 100%;
   }
 
-  #camera-stream {
-    height: 90vh;
-  }
-
   #camera-overlay {
     position: absolute;
     top: 8px;
@@ -57,6 +54,18 @@ ${styleTags}
     left: 8px;
     right: 8px;
   }
+
+
+  .stage{
+    position: relative; 
+    overflow:hidden;
+  }
+
+  #camera-stream {
+    position: absolute;
+  }
+
+
 </style>
 <button class="card card-button" id="parking-card">
     <i class="fa-solid fa-video"></i> Câmera de ré
@@ -64,7 +73,9 @@ ${styleTags}
 <div class="backdrop closed"></div>
 <div class="camera-modal closed">
     <button class="close">&times;</button>
-    <video autoplay id="camera-stream"></video>
+    <div class="stage">
+      <video autoplay id="camera-stream"></video>
+    </div>
     <canvas id="camera-overlay"></canvas>
 </div>
 </div>
@@ -124,6 +135,40 @@ class CameraWidget extends HTMLElement {
     this.shadowRoot
       .querySelector(".backdrop")
       .addEventListener("click", () => this.closeCamera());
+
+    this.updateCameraSettings();
+  }
+
+  getSettings() {
+    const cameraSettings =
+      JSON.parse(localStorage.getItem("camera-settings") || "null") ||
+      DEFAULT_CAMERA_SETTINGS;
+    return cameraSettings;
+  }
+
+  updateCameraSettings() {
+    const cameraSettings = this.getSettings();
+
+    /**
+     * @type {HTMLDivElement}
+     */
+    const stage = this.shadowRoot.querySelector(".stage");
+    /**
+     * @type {HTMLVideoElement}
+     */
+    const video = this.shadowRoot.querySelector("#camera-stream");
+
+    stage.style.height = `${cameraSettings.height}px`;
+    stage.style.width = `${cameraSettings.width}px`;
+
+
+    video.width = cameraSettings.width;
+    video.height = cameraSettings.height;
+  
+    video.style.height = `${cameraSettings.height}px`;
+    video.style.width = `${cameraSettings.width}px`;
+
+    video.style.transform = `scale(${cameraSettings.scale}) translateX(${cameraSettings.x}px) translateY(${cameraSettings.y}px) rotate(${cameraSettings.rotate}deg)`;
   }
 
   /**
@@ -137,38 +182,63 @@ class CameraWidget extends HTMLElement {
     const videoElement = this.shadowRoot.querySelector("#camera-stream");
     videoElement.srcObject = stream;
 
-    /**
-     * @type {HTMLCanvasElement}
-     */
-    const canvas = this.shadowRoot.querySelector("#camera-overlay");
-
-    setTimeout(() => {
-      canvas.width = videoElement.clientWidth;
-      canvas.height = videoElement.clientHeight;
-
-      const ctx = canvas.getContext("2d");
-
-      ctx.strokeStyle = "red";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-
-      ctx.lineTo(100, 100);
-      ctx.stroke();
-    }, 100);
+    this.updateCameraSettings();
   }
 
   showCamera() {
     this.webRtcReceiver.requestStream();
     this.shadowRoot.querySelector(".backdrop").classList.remove("closed");
     this.shadowRoot.querySelector(".camera-modal").classList.remove("closed");
+
+    window.addEventListener("keyup", this.handleKey);
   }
 
   closeCamera() {
     this.shadowRoot.querySelector(".backdrop").classList.add("closed");
     this.shadowRoot.querySelector(".camera-modal").classList.add("closed");
     this.webRtcReceiver.closeAllConnections();
+
+    window.removeEventListener("keyup", this.handleKey);
   }
+
+  handleKey = (event) => {
+    const command = event.key;
+
+    const settings = this.getSettings();
+
+    const positionAmount = event.ctrlKey ? 10 : 1;
+
+    switch (command) {
+      case "ArrowUp":
+        settings.y = settings.y - positionAmount;
+        break;
+      case "ArrowDown":
+        settings.y = settings.y + positionAmount;
+        break;
+      case "ArrowLeft":
+        settings.x = settings.x - positionAmount;
+        break;
+      case "ArrowRight":
+        settings.x = settings.x + positionAmount;
+        break;
+      case "+":
+      case "=":
+        settings.scale = settings.scale + 0.05;
+        break;
+      case "-":
+        settings.scale = settings.scale - 0.05;
+        break;
+      case "9":
+        settings.rotate = settings.rotate - 0.5;
+        break;
+      case "0":
+        settings.rotate = settings.rotate + 0.5;
+        break;
+    }
+
+    localStorage.setItem("camera-settings", JSON.stringify(settings));
+    this.updateCameraSettings();
+  };
 }
 
 window.customElements.define("camera-widget", CameraWidget);

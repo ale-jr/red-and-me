@@ -1,3 +1,4 @@
+import { DEFAULT_CAMERA_SETTINGS } from "../consts/camera.js";
 import { styleTags } from "../consts/styles.js";
 
 const template = document.createElement("template");
@@ -9,6 +10,12 @@ template.innerHTML = `
             display: flex;
             flex-direction:column;
             gap: 16px;
+            overflow: auto;
+        }
+
+        .section {
+          margin: 12px 0 0 0 ;
+          font-size: 18px;
         }
     </style>
     <div class="backdrop hidden"></div>
@@ -25,6 +32,31 @@ template.innerHTML = `
             <label>
                 <input type="checkbox" id="dark-mode-checkbox" />
                 Dark mode
+            </label>
+            <p class="section">Camera settings</p>
+            <label>
+                height<br/>
+                <input type="number" min="0" id="camera-height-input" />
+            </label>
+            <label>
+                width<br/>
+                <input type="number" min="0" id="camera-width-input" />
+            </label>
+            <label>
+                scale<br/>
+                <input type="number" min="1" step="0.25" id="camera-scale-input" />
+            </label>
+            <label>
+                x<br/>
+                <input type="number" min="0" step="1" id="camera-x-input" />
+            </label>
+            <label>
+                y<br/>
+                <input type="number" min="0" step="1" id="camera-y-input" />
+            </label>
+            <label>
+                rotate<br/>
+                <input type="number"  step="1" id="camera-rotate-input" />
             </label>
         </div>
         <div class="modal-footer">
@@ -65,6 +97,20 @@ class SettingsModal extends HTMLElement {
     this.shadowRoot.querySelector("#token-input").value =
       localStorage.getItem("credentials");
 
+    const cameraSettings =
+      JSON.parse(localStorage.getItem("camera-settings") || "null") ||
+      DEFAULT_CAMERA_SETTINGS;
+    this.shadowRoot.querySelector("#camera-height-input").value =
+      cameraSettings.height;
+    this.shadowRoot.querySelector("#camera-width-input").value =
+      cameraSettings.width;
+    this.shadowRoot.querySelector("#camera-scale-input").value =
+      cameraSettings.scale;
+
+    this.shadowRoot.querySelector("#camera-x-input").value = cameraSettings.x;
+    this.shadowRoot.querySelector("#camera-y-input").value = cameraSettings.y;
+    this.shadowRoot.querySelector("#camera-rotate-input").value =
+      cameraSettings.rotate;
     this.shadowRoot
       .querySelector("#save-settings")
       .addEventListener("click", () => {
@@ -88,12 +134,31 @@ class SettingsModal extends HTMLElement {
 
   save() {
     const token = this.shadowRoot.querySelector("#token-input").value;
+    localStorage.setItem("credentials", token);
+
     const theme = this.shadowRoot.querySelector("#dark-mode-checkbox").checked
       ? "dark"
       : "light";
-
-    localStorage.setItem("credentials", token);
     localStorage.setItem("theme", theme);
+
+    const height = +this.shadowRoot.querySelector("#camera-height-input").value;
+    const width = +this.shadowRoot.querySelector("#camera-width-input").value;
+    const scale = +this.shadowRoot.querySelector("#camera-scale-input").value;
+    const x = +this.shadowRoot.querySelector("#camera-x-input").value;
+    const y = +this.shadowRoot.querySelector("#camera-y-input").value;
+    const rotate = +this.shadowRoot.querySelector("#camera-rotate-input").value;
+    localStorage.setItem(
+      "camera-settings",
+      JSON.parse({
+        height,
+        width,
+        scale,
+        x,
+        y,
+        rotate,
+      })
+    );
+
     this.updateTheme();
     this.closeModal();
   }

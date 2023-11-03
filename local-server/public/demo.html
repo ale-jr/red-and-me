@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>demo page</title>
+</head>
+
+<body>
+
+    <video autoplay playsinline webkit-playsinline muted hidden id="videoelement"></video>
+
+    <div class="container">
+        <canvas id="canvaselement" width="720" height="480"></canvas>
+    </div>
+
+    <script>
+        var videoelement = document.getElementById("videoelement");
+        var canvaselement = document.querySelector('#canvaselement');
+        var ctx = canvaselement.getContext('2d', { alpha: false });
+        var canvasInterval = null;
+        var fps = 60
+        var localStreamConstraints = {
+            audio: true,
+            video: { width: 1920, height: 1080 },
+        };
+
+        if (videoelement) {
+            navigator.mediaDevices
+                .getUserMedia(localStreamConstraints)
+                .then(gotStream)
+                .catch(function (e) {
+                    if (confirm("An error with camera occured:(" + e.name + ") Do you want to reload?")) {
+                        location.reload();
+                    }
+                });
+        }
+        //if found stream found 
+        function gotStream(stream) {
+            console.log("stream", stream)
+            videoelement.srcObject = stream
+            videoelement.play()
+        }
+
+
+
+        function drawImage(video) {
+            const zoom = window.zoom
+
+            const newHeight = video.videoHeight * zoom
+            const newWidth = video.videoWidth * zoom
+
+            var x = canvaselement.width / 2 - newWidth / 2;
+            var y = canvaselement.height / 2 - newHeight / 2;
+            console.log("height", video.videoHeight, video.videoWidth)
+
+            ctx.drawImage(video, x, y, newWidth, newHeight);
+        }
+        canvasInterval = window.setInterval(() => {
+            drawImage(videoelement);
+        }, 1000 / fps);
+    </script>
+</body>
+
+</html>

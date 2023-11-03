@@ -12,6 +12,7 @@ export const createCameraStream = () => {
       "--use-fake-ui-for-media-stream",
       "--no-sandbox",
       "--headless=new",
+      "--remote-debugging-port=9223",
       `http://localhost:${consts.SERVER_PORT}/camera-stream`,
     ]);
     chromeCommand.stdout.on("data", (data) => {
