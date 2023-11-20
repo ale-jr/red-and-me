@@ -1,5 +1,6 @@
 #include "carState.h"
 #include <Arduino.h>
+#include "keyboard.h"
 State currentState = {
     .steeringWheelControls = {
         .leftUp = false,
@@ -73,6 +74,26 @@ void sendSteeringWheelControls()
     printBool(currentState.steeringWheelControls.acceptCall, true);
     printBool(currentState.steeringWheelControls.endCall, false);
     Serial.println();
+
+    // TODO: improve commands
+    if (currentState.steeringWheelControls.leftUp)
+        mediaPrevious();
+    if (currentState.steeringWheelControls.leftMiddle || currentState.steeringWheelControls.rightMiddle)
+        mediaPlayPause();
+    if (currentState.steeringWheelControls.leftDown)
+        mediaNext();
+    if (currentState.steeringWheelControls.rightUp)
+        volumeUp();
+    if (currentState.steeringWheelControls.rightDown)
+        volumeDown();
+    if (currentState.steeringWheelControls.mute)
+        mute();
+    if (currentState.steeringWheelControls.voiceAssistant)
+        openAssistant();
+    if (currentState.steeringWheelControls.acceptCall)
+        openHome();
+    if (currentState.steeringWheelControls.endCall)
+        openHome();
 }
 
 void updateLights(Lights updated)

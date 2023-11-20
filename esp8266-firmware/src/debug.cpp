@@ -1,5 +1,6 @@
 #include "debug.h"
 #include <Arduino.h>
+#include <keyboard.h>
 
 #define NO_DEBUG 0
 #define DEBUG_BY_ID 1
@@ -30,8 +31,10 @@ void printIds()
 void filterMessageById(long unsigned int id)
 {
     int index = -1;
-    for(int i=0;i<MAX_IDS;i++){
-        if(discoveredIds[i] == id){
+    for (int i = 0; i < MAX_IDS; i++)
+    {
+        if (discoveredIds[i] == id)
+        {
             index = i;
             break;
         }
@@ -39,16 +42,17 @@ void filterMessageById(long unsigned int id)
 
     debugMode = DEBUG_BY_ID;
 
-    if(index > -1){
-        
+    if (index > -1)
+    {
+
         selectedIndex = index;
         Serial.print("Filtering by id: ");
         Serial.println(index);
     }
-    else{
+    else
+    {
         Serial.println("id not found");
     }
-
 }
 
 void stopFilterMessages()
@@ -121,9 +125,38 @@ void debugLoop()
     {
         stopFilterMessages();
     }
+    else if (command.equals("volUp"))
+    {
+        volumeUp();
+    }
+    else if (command.equals("volDown"))
+    {
+        volumeUp();
+    }
+    else if (command.equals("playPause"))
+    {
+        mediaPlayPause();
+    }
+    else if (command.equals("previous"))
+    {
+        mediaPrevious();
+    }
+    else if (command.equals("next"))
+    {
+        mediaNext();
+    }
+    else if (command.equals("home"))
+    {
+        openHome();
+    }
+    else if (command.equals("isDeviceConnected"))
+    {
+        Serial.print("isDeviceConnected: ");
+        Serial.println(isDeviceConnected() ? "true": "false");
+    }
     else
     {
-        unsigned long int id = strtoul(command.c_str(),NULL,10);
+        unsigned long int id = strtoul(command.c_str(), NULL, 10);
         filterMessageById(id);
     }
 }
