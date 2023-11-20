@@ -1,15 +1,17 @@
 #include <Arduino.h>
 #include <can.h>
 #include <watchdog.h>
+#include <debug.h>
 
-
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   setupPowerRelays();
   setupCan();
 }
 
-void loop() {
+void loop()
+{
   canLoop();
   debugLoop();
   watchdogLoop();

@@ -5,8 +5,8 @@
 #include <carState.h>
 #include <watchdog.h>
 
-#define CAN0_INT D4
-#define CAN0_CS D3
+#define CAN0_INT 2
+#define CAN0_CS 0
 
 #define STEERING_WHEEL_CONTROL_ID 2250784768
 
