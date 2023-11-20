@@ -9,3 +9,5 @@ void setupPowerRelays();
 void keepAlive();
 
 void watchdogLoop();
+
+void cancelPowerOff();

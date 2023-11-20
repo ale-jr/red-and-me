@@ -5,9 +5,9 @@
 
 #define SWITCHOVER_DELAY 200
 
-#define CAN_NO_MESSAGES_TIMEOUT 30000
+#define CAN_NO_MESSAGES_TIMEOUT 10000
 
-#define SHUTDOWN_WAIT_TIME 60000
+#define SHUTDOWN_WAIT_TIME 120000
 
 long unsigned int shutdownAt = 0;
 
@@ -39,8 +39,19 @@ void setupPowerRelays()
     changeToBattery();
 }
 
-void keepAlive(){
+void cancelPowerOff()
+{
+    shutdownAt = 0;
+    Serial.println("S|cancel_shutdown_request");
+}
+
+void keepAlive()
+{
     lastMessageMillis = millis();
+    if (shutdownAt > 0)
+    {
+        cancelPowerOff();
+    }
 }
 
 void watchdogLoop()
@@ -51,8 +62,7 @@ void watchdogLoop()
         Serial.println("S|shutdown_request");
         shutdownAt = millis() + SHUTDOWN_WAIT_TIME;
     }
-
-    if (shutdownAt > 0 && millis() > shutdownAt)
+    else if (shutdownAt > 0 && millis() > shutdownAt)
     {
         powerOff();
     }
