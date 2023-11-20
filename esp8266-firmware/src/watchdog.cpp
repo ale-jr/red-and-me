@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-#define ACC_RELAY 5
-#define BATTERY_RELAY 4
+#define ACC_RELAY 33
+#define BATTERY_RELAY 26
 
 #define SWITCHOVER_DELAY 200
 
