@@ -1,12 +1,13 @@
 #include "can.h"
+#include <Arduino.h>
 #include <mcp_can.h>
 #include <SPI.h>
 #include <debug.h>
 #include <carState.h>
 #include <watchdog.h>
 
-#define CAN0_INT 16
-#define CAN0_CS 17
+#define CAN0_INT 1
+#define CAN0_CS 7
 
 #define STEERING_WHEEL_CONTROL_ID 2250784768
 
@@ -24,16 +25,21 @@ void setupCan()
     {
         Serial.print("S|can_error|");
         Serial.println(status);
+
+        while (true)
+        {
+            Serial.println("oh no!");
+            delay(1000);
+        }
     }
 
     CAN0.setMode(MCP_NORMAL);
     pinMode(CAN0_INT, INPUT);
 }
 
-CanMessage lastMessage = {
-    .id = 0,
-    .length = 0,
-    .buffer = {}};
+unsigned long lastId = 0;
+unsigned char lastLength = 0;
+unsigned char lastBuffer[12];
 
 void canLoop()
 {
@@ -41,17 +47,29 @@ void canLoop()
     if (digitalRead(CAN0_INT))
         return;
 
-    CanMessage message = {};
-    CAN0.readMsgBuf(&message.id, &message.length, message.buffer);
-    handleId(message.id);
+    unsigned long id = 0;
+    unsigned char length = 0;
+    unsigned char buffer[12];
+    CAN0.readMsgBuf(&id, &length, buffer);    
+    Serial.print("M|");
+    Serial.print(id);
+    Serial.print("|");
+    Serial.print(length);
+    Serial.print("|");
+    for(int i=0;i<length;i++){
+        Serial.print(buffer[i]);
+        Serial.print(",");
+    }
+    Serial.println();    
+    handleId(id);
     keepAlive();
     if (getDebugMode())
-        handleMessageInDebugMode(message);
+        handleMessageInDebugMode(id, length, buffer);
     else
-        handleMessage(message);
+        handleMessage(id, length, buffer);
 }
 
-void handleSteeringWheelControls(CanMessage message)
+void handleSteeringWheelControls(unsigned char buffer[12])
 {
     SteeringWheelControls state = {
         .leftUp = false,
@@ -66,8 +84,8 @@ void handleSteeringWheelControls(CanMessage message)
         .endCall = false,
     };
 
-    byte firstByte = message.buffer[0];
-    byte secondByte = message.buffer[1];
+    byte firstByte = buffer[0];
+    byte secondByte = buffer[1];
 
     if (firstByte == 16 && secondByte == 0)
         state.leftUp = true;
@@ -92,43 +110,43 @@ void handleSteeringWheelControls(CanMessage message)
     updateSteeringwheelControls(state);
 }
 
-void handleMessage(CanMessage message)
+void handleMessage(unsigned long id, unsigned char length, unsigned char buffer[12])
 {
-    switch (message.id)
+    switch (id)
     {
     case STEERING_WHEEL_CONTROL_ID:
-        handleSteeringWheelControls(message);
+        handleSteeringWheelControls(buffer);
         break;
     default:
         break;
     }
 }
 
-void handleMessageInDebugMode(CanMessage message)
+void handleMessageInDebugMode(unsigned long id, unsigned char length, unsigned char buffer[12])
 {
 
     if (getSelectedIndex() > -1)
     {
         long unsigned int selectedId = getDiscoveredIds()[getSelectedIndex()];
-        if (selectedId == message.id)
+        if (selectedId == id)
         {
             bool isSameMessage = true;
-            for (int i = 0; i < message.length; i++)
+            for (int i = 0; i < length; i++)
             {
-                if (message.buffer[i] != lastMessage.buffer[i])
+                if (buffer[i] != lastBuffer[i])
                 {
                     isSameMessage = false;
                     break;
                 }
             }
             if (!isSameMessage)
-                printMessage(message.id, message.length, message.buffer);
+                printMessage(id, length, buffer);
 
-            lastMessage.id = message.id;
-            lastMessage.length = message.length;
-            for (int i = 0; i < message.length; i++)
+            lastId = id;
+            lastLength = length;
+            for (int i = 0; i < length; i++)
             {
-                lastMessage.buffer[i] = message.buffer[i];
+                lastBuffer[i] = buffer[i];
             }
         }
     }

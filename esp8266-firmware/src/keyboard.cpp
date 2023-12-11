@@ -40,7 +40,8 @@ void mediaPrevious()
 
 void volumeUp()
 {
-    bleKeyboard.write(KEY_MEDIA_VOLUME_UP);
+    if (bleKeyboard.isConnected())
+        bleKeyboard.write(KEY_MEDIA_VOLUME_UP);
 }
 
 void volumeDown()
