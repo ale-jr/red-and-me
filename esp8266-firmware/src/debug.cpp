@@ -13,19 +13,19 @@ long unsigned int discoveredIds[MAX_IDS] = {};
 void printIds()
 {
     debugMode = NO_DEBUG;
-    Serial.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Found IDs:");
+    Serial1.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Found IDs:");
     for (int i = 0; i < MAX_IDS; i++)
     {
         long unsigned int id = discoveredIds[i];
         if (id > 0)
         {
-            Serial.print("#");
-            Serial.print(i);
-            Serial.print(" - ");
-            Serial.println(id);
+            Serial1.print("#");
+            Serial1.print(i);
+            Serial1.print(" - ");
+            Serial1.println(id);
         }
     }
-    Serial.print("Enter index to filter");
+    Serial1.print("Enter index to filter");
 }
 
 void filterMessageById(long unsigned int id)
@@ -46,12 +46,12 @@ void filterMessageById(long unsigned int id)
     {
 
         selectedIndex = index;
-        Serial.print("Filtering by id: ");
-        Serial.println(index);
+        Serial1.print("Filtering by id: ");
+        Serial1.println(index);
     }
     else
     {
-        Serial.println("id not found");
+        Serial1.println("id not found");
     }
 }
 
@@ -59,7 +59,7 @@ void stopFilterMessages()
 {
     debugMode = NO_DEBUG;
     selectedIndex = -1;
-    Serial.print("Stopped filtering");
+    Serial1.print("Stopped filtering");
 }
 
 void handleId(long unsigned int id)
@@ -80,17 +80,17 @@ void handleId(long unsigned int id)
 
 void printMessage(long unsigned int id, unsigned char length, unsigned char buffer[])
 {
-    Serial.print("ID: ");
-    Serial.print(id);
-    Serial.print(" len: ");
-    Serial.print(length);
-    Serial.print(" data: ");
+    Serial1.print("ID: ");
+    Serial1.print(id);
+    Serial1.print(" len: ");
+    Serial1.print(length);
+    Serial1.print(" data: ");
     for (int i = 0; i < length; i++)
     {
-        Serial.print(buffer[i]);
-        Serial.print(",");
+        Serial1.print(buffer[i]);
+        Serial1.print(",");
     }
-    Serial.println();
+    Serial1.println();
 }
 
 int getDebugMode()
@@ -110,13 +110,13 @@ long unsigned int *getDiscoveredIds()
 
 void debugLoop()
 {
-    bool shouldDebug = Serial.available() > 0;
+    bool shouldDebug = Serial1.available() > 0;
     if (!shouldDebug)
         return;
 
-    String command = Serial.readStringUntil('\n');
+    String command = Serial1.readStringUntil('\n');
 
-    Serial.println("Command" + command);
+    Serial1.println("Command" + command);
     if (command.equals("ids"))
     {
         printIds();
@@ -151,8 +151,8 @@ void debugLoop()
     }
     else if (command.equals("isDeviceConnected"))
     {
-        Serial.print("isDeviceConnected: ");
-        Serial.println(isDeviceConnected() ? "true": "false");
+        Serial1.print("isDeviceConnected: ");
+        Serial1.println(isDeviceConnected() ? "true": "false");
     }
     else
     {

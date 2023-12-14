@@ -6,7 +6,7 @@
 #define DEBUG_MODE true
 void setup()
 {
-  Serial.begin(115200);
+  Serial1.begin(115200, SERIAL_8N1, 20, 21);
   setupPowerRelays();
   delay(3000);
   setupCan();

@@ -22,7 +22,7 @@ void changeToBattery()
     // Disconnect the accessory source
     digitalWrite(ACC_RELAY, LOW);
     // Notify running on battery
-    Serial.println("S|running_on_battery");
+    Serial1.println("S|running_on_battery");
 }
 
 void powerOff()
@@ -47,7 +47,7 @@ void setupPowerRelays()
 void cancelPowerOff()
 {
     shutdownAt = 0;
-    Serial.println("S|cancel_shutdown_request");
+    Serial1.println("S|cancel_shutdown_request");
 }
 
 void keepAlive()
@@ -64,7 +64,7 @@ void watchdogLoop()
 
     if ((lastMessageMillis + CAN_NO_MESSAGES_TIMEOUT) < millis() && shutdownAt < 1)
     {
-        Serial.println("S|shutdown_request");
+        Serial1.println("S|shutdown_request");
         shutdownAt = millis() + SHUTDOWN_WAIT_TIME;
     }
     else if (shutdownAt > 0 && millis() > shutdownAt)

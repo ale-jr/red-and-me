@@ -20,10 +20,10 @@ State currentState = {
 
 void printBool(bool value, bool withSeparator)
 {
-    Serial.print(value ? "1" : "0");
+    Serial1.print(value ? "1" : "0");
     if (withSeparator)
     {
-        Serial.print("|");
+        Serial1.print("|");
     }
 }
 
@@ -62,7 +62,7 @@ void updateSteeringwheelControls(SteeringWheelControls updated)
 
 void sendSteeringWheelControls()
 {
-    Serial.print("SWC|");
+    Serial1.print("SWC|");
     printBool(currentState.steeringWheelControls.leftUp, true);
     printBool(currentState.steeringWheelControls.leftMiddle, true);
     printBool(currentState.steeringWheelControls.leftDown, true);
@@ -73,7 +73,7 @@ void sendSteeringWheelControls()
     printBool(currentState.steeringWheelControls.voiceAssistant, true);
     printBool(currentState.steeringWheelControls.acceptCall, true);
     printBool(currentState.steeringWheelControls.endCall, false);
-    Serial.println();
+    Serial1.println();
 
     // TODO: improve commands
     if (currentState.steeringWheelControls.leftUp)
@@ -115,13 +115,13 @@ void updateLights(Lights updated)
 
 void sendLights()
 {
-    Serial.print("L|");
+    Serial1.print("L|");
     printBool(currentState.lights.highBeam, true);
     printBool(currentState.lights.lowBeam, true);
     printBool(currentState.lights.brake, true);
     printBool(currentState.lights.leftTurnSignal, true);
     printBool(currentState.lights.rightTurnSignal, false);
-    Serial.println();
+    Serial1.println();
 }
 
 void updateDoors(Doors updated)
@@ -140,11 +140,11 @@ void updateDoors(Doors updated)
 
 void sendDoors()
 {
-    Serial.print("D|");
+    Serial1.print("D|");
     printBool(currentState.doors.driver, true);
     printBool(currentState.doors.passenger, true);
     printBool(currentState.doors.trunk, false);
-    Serial.println();
+    Serial1.println();
 }
 
 void updateTransmission(Transmission updated)
@@ -163,7 +163,7 @@ void updateTransmission(Transmission updated)
 
 void sendTransmission()
 {
-    Serial.print("T|");
+    Serial1.print("T|");
     printBool(currentState.transmision.manual, true);
-    Serial.println(currentState.transmision.gear);
+    Serial1.println(currentState.transmision.gear);
 }

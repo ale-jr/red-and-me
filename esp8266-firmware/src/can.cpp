@@ -19,16 +19,16 @@ void setupCan()
 
     if (status == CAN_OK)
     {
-        Serial.println("S|can_ok");
+        Serial1.println("S|can_ok");
     }
     else
     {
-        Serial.print("S|can_error|");
-        Serial.println(status);
+        Serial1.print("S|can_error|");
+        Serial1.println(status);
 
         while (true)
         {
-            Serial.println("oh no!");
+            Serial1.println("oh no!");
             delay(1000);
         }
     }
@@ -51,16 +51,16 @@ void canLoop()
     unsigned char length = 0;
     unsigned char buffer[12];
     CAN0.readMsgBuf(&id, &length, buffer);    
-    Serial.print("M|");
-    Serial.print(id);
-    Serial.print("|");
-    Serial.print(length);
-    Serial.print("|");
+    Serial1.print("M|");
+    Serial1.print(id);
+    Serial1.print("|");
+    Serial1.print(length);
+    Serial1.print("|");
     for(int i=0;i<length;i++){
-        Serial.print(buffer[i]);
-        Serial.print(",");
+        Serial1.print(buffer[i]);
+        Serial1.print(",");
     }
-    Serial.println();    
+    Serial1.println();    
     handleId(id);
     keepAlive();
     if (getDebugMode())
