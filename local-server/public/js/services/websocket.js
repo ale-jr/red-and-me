@@ -5,6 +5,8 @@ export const createWebsocket = ({ onMessage, onOpen, device }) => {
   const url = `${LOCAL_SERVER_WS_URL}/live`;
   const socket = new WebSocket(url);
 
+  let watchdogIntervalId = null;
+
   const clientId = getRandomId();
 
   /**
@@ -19,13 +21,29 @@ export const createWebsocket = ({ onMessage, onOpen, device }) => {
   socket.onopen = (event) => {
     log(LOG_LEVEL.INFO, "WebSocket opened", event);
     if (typeof onOpen === "function") onOpen();
+
+    keepAlive();
   };
+
+  const keepAlive = () => {
+    clearTimeout(watchdogIntervalId)
+
+    setTimeout(() => {
+      sendMessage({
+        type: 'ping'
+      })
+    }, 1500)
+
+    watchdogIntervalId = setTimeout(() => {
+      handleReconnect()
+    }, 2000)
+  }
 
   socket.onmessage = (event) => {
     try {
       const message = JSON.parse(event.data);
       log(LOG_LEVEL.DEBUG, "WebSocket receive message", message);
-      if (message.type === "ping") {
+      if (message.type === "pong") {
         keepAlive();
       }
       onMessage(message);
@@ -36,14 +54,6 @@ export const createWebsocket = ({ onMessage, onOpen, device }) => {
 
   socket.onerror = () => {
     setTimeout(handleReconnect, 2_000);
-  };
-
-  let timeoutId = -1;
-  const keepAlive = () => {
-    log(LOG_LEVEL.INFO, "WebSocket keep alive");
-    sendMessage({ type: "pong" });
-    clearTimeout(timeoutId);
-    setTimeout(handleReconnect, 5_000);
   };
 
   let wsResponse = {

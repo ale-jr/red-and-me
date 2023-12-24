@@ -4,7 +4,6 @@ import fastifyWebsocket from "@fastify/websocket";
 import * as path from "path";
 import { onConnect, onDisconnect, onMessage } from "./services/websocket.js";
 import { v4 as randomId } from "uuid";
-import { cameraStream } from "./services/cameraStream.js";
 import { consts } from "./consts/index.js";
 import dirname from "./consts/dirname.cjs";
 import { state, startEvents } from './services/carEventsService.js'
@@ -42,10 +41,6 @@ fastify.get("/dash", function handler(request, reply) {
   reply.sendFile("dash.html", { cacheControl: false });
 });
 
-fastify.get("/camera-stream", function handler(request, reply) {
-  reply.sendFile("camera-stream.html", { cacheControl: false });
-});
-
 fastify.get('/state', function handler(request, reply) {
   reply.send(state);
 })
@@ -53,7 +48,6 @@ fastify.get('/state', function handler(request, reply) {
 const start = async () => {
   try {
     await fastify.listen({ port: consts.SERVER_PORT, host: "0.0.0.0" });
-    cameraStream.start();
     startEvents();
   } catch (err) {
     fastify.log.error(err);

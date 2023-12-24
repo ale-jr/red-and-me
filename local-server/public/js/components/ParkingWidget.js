@@ -1,8 +1,6 @@
 import { DEFAULT_CAMERA_SETTINGS } from "../consts/camera.js";
-import { WS_MESSAGE, WS_SEND_MESSAGE } from "../consts/events.js";
+import { WS_MESSAGE } from "../consts/events.js";
 import { styleTags } from "../consts/styles.js";
-import { LOG_LEVEL, log } from "../services/log.js";
-import { createWebRTCReceiver } from "../services/webrtcReceiver.js";
 
 const template = document.createElement("template");
 
@@ -10,6 +8,8 @@ const THRESHOLDS = {
   WARNING: 50,
   DANGER: 20
 }
+
+const STREAM_URL = `http://localhost:8080/?action=stream`
 
 template.innerHTML = `
 ${styleTags}
@@ -125,7 +125,7 @@ ${styleTags}
 <div class="camera-modal closed">
     <button class="close">&times;</button>
     <div class="stage">
-      <video autoplay id="camera-stream"></video>
+      <img id="camera-stream"/>
     </div>
     <div class="sensors">
       <div class="sensor-values" id="front-sensors">
@@ -145,10 +145,8 @@ ${styleTags}
 `;
 
 class ParkingWidget extends HTMLElement {
-  /**
-   * @type {import("../services/webrtcReceiver.js").WebRTCReceiver}
-   */
-  webRtcReceiver = null;
+
+
   constructor() {
     super();
     this._shadowRoot = this.attachShadow({
@@ -156,15 +154,8 @@ class ParkingWidget extends HTMLElement {
     });
     this._shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.webRtcReceiver = createWebRTCReceiver({
-      onStream: (stream) => this.onStream(stream),
-      sendMessage: (data) => {
-        const event = new CustomEvent(WS_SEND_MESSAGE, {
-          detail: data,
-        });
-        document.dispatchEvent(event);
-      },
-    });
+    this._loadTimeoutId = null;
+
 
 
     document.addEventListener(WS_MESSAGE, (event) => {
@@ -239,6 +230,23 @@ class ParkingWidget extends HTMLElement {
 
 
 
+  loadStream = () => {
+    const cameraStreamElement = this.shadowRoot.querySelector('#camera-stream')
+    cameraStreamElement.setAttribute('src', `${STREAM_URL}&t=${Date.now()}`)
+
+    clearTimeout(this._loadTimeoutId);
+    this._loadTimeoutId = setTimeout(() => {
+      this.loadStream()
+    }, 500)
+
+  }
+
+  unloadStream = () => {
+    const cameraStreamElement = this.shadowRoot.querySelector('#camera-stream')
+    cameraStreamElement.setAttribute('src', '')
+    clearTimeout(this._loadTimeoutId);
+  }
+
   getSettings() {
     const cameraSettings =
       JSON.parse(localStorage.getItem("camera-settings") || "null") ||
@@ -286,19 +294,20 @@ class ParkingWidget extends HTMLElement {
   }
 
   showCamera() {
-    this.webRtcReceiver.requestStream();
     this.shadowRoot.querySelector(".backdrop").classList.remove("closed");
     this.shadowRoot.querySelector(".camera-modal").classList.remove("closed");
 
     window.addEventListener("keyup", this.handleKey);
+
+    this.loadStream();
   }
 
   closeCamera() {
     this.shadowRoot.querySelector(".backdrop").classList.add("closed");
     this.shadowRoot.querySelector(".camera-modal").classList.add("closed");
-    this.webRtcReceiver.closeAllConnections();
-
     window.removeEventListener("keyup", this.handleKey);
+
+    this.unloadStream();
   }
 
   handleKey = (event) => {

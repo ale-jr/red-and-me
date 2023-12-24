@@ -11,17 +11,23 @@
  * @param {WebSocket} socket
  * @param {string} clientId
  */
-export const onMessage = (message, socket, clientId) => {
-  Object.entries(sockets).forEach(([client, socket]) => {
-    if (client !== clientId) socket.send(message.toString());
-  });
+export const onMessage = (message, socket, _clientId) => {
 
   try {
-    const { type, command } = JSON.parse(message);
-    //TODO: do something
+    const { type, command: _command } = JSON.parse(message);
+
+    switch (type) {
+      case 'ping':
+        socket.send(JSON.stringify({ type: 'pong' }))
+        return;
+    }
+
+    sendToAll(message.toString());
   } catch (e) {
     console.error("e", e);
   }
+
+
 };
 
 /**
