@@ -2,14 +2,23 @@
 #include <Arduino.h>
 #include <mcp_can.h>
 #include <SPI.h>
-#include <debug.h>
+
 #include <carState.h>
 #include <watchdog.h>
+
+#define TOGGLE_SNIFFER 9
+#define SNIFFER_LED 8
 
 #define CAN0_INT 1
 #define CAN0_CS 7
 
-#define STEERING_WHEEL_CONTROL_ID 2250784768
+#define STEERING_WHEEL_CONTROL_ID 0x86284000
+#define LIGHT_ID 0x82214000
+#define BRAKE_ID 0x86264000
+#define DOOR_ID 0x86214000
+#define TRANSMISSION_ID 0x8421400B
+
+bool enableSniffer = false;
 
 MCP_CAN CAN0(CAN0_CS);
 
@@ -19,30 +28,51 @@ void setupCan()
 
     if (status == CAN_OK)
     {
-        Serial1.println("S|can_ok");
+        Serial.println("S|can_ok");
     }
     else
     {
-        Serial1.print("S|can_error|");
-        Serial1.println(status);
-
-        while (true)
-        {
-            Serial1.println("oh no!");
-            delay(1000);
-        }
+        Serial.print("S|can_error|");
+        Serial.println(status);
     }
 
     CAN0.setMode(MCP_NORMAL);
     pinMode(CAN0_INT, INPUT);
+    pinMode(TOGGLE_SNIFFER, INPUT);
+    pinMode(SNIFFER_LED, OUTPUT);
+    digitalWrite(SNIFFER_LED, HIGH);
+
 }
 
 unsigned long lastId = 0;
 unsigned char lastLength = 0;
 unsigned char lastBuffer[12];
 
+void printHex(long num)
+{
+    if (num < 0x10)
+    {
+        Serial.print("0");
+    }
+    Serial.print(num, HEX);
+}
+
+unsigned long int lastToggleSnifferPressTime = 0;
+
 void canLoop()
 {
+    bool toggleSnifferRead = digitalRead(TOGGLE_SNIFFER);
+    if (toggleSnifferRead == false)
+    {
+        if ((millis() - lastToggleSnifferPressTime) > 100)
+        {
+            enableSniffer = !enableSniffer;
+            Serial.print("enable: ");
+            Serial.println(enableSniffer);
+            digitalWrite(SNIFFER_LED, !enableSniffer);
+        }
+        lastToggleSnifferPressTime = millis();
+    }
 
     if (digitalRead(CAN0_INT))
         return;
@@ -50,26 +80,24 @@ void canLoop()
     unsigned long id = 0;
     unsigned char length = 0;
     unsigned char buffer[12];
-    CAN0.readMsgBuf(&id, &length, buffer);    
-    Serial1.print("M|");
-    Serial1.print(id);
-    Serial1.print("|");
-    Serial1.print(length);
-    Serial1.print("|");
-    for(int i=0;i<length;i++){
-        Serial1.print(buffer[i]);
-        Serial1.print(",");
+    CAN0.readMsgBuf(&id, &length, buffer);
+
+    if (enableSniffer)
+    {
+        printHex(id);
+        Serial.print(",00,00,");
+        for (int i = 0; i < length; i++)
+        {
+            printHex(buffer[i]);
+        }
+        Serial.println();
     }
-    Serial1.println();    
-    handleId(id);
+
     keepAlive();
-    if (getDebugMode())
-        handleMessageInDebugMode(id, length, buffer);
-    else
-        handleMessage(id, length, buffer);
+    handleMessage(id, length, buffer);
 }
 
-void handleSteeringWheelControls(unsigned char buffer[12])
+void handleSteeringWheelControlsMessage(unsigned char buffer[12])
 {
     SteeringWheelControls state = {
         .leftUp = false,
@@ -110,44 +138,106 @@ void handleSteeringWheelControls(unsigned char buffer[12])
     updateSteeringwheelControls(state);
 }
 
+void handleBrakeMessage(unsigned char buffer[12])
+{
+    Lights currentLigths = getCurrentState().lights;
+    Lights lights = {
+        .highBeam = currentLigths.highBeam,
+        .lowBeam = currentLigths.lowBeam,
+        .brake = buffer[4] == 0x13,
+        .leftTurnSignal = currentLigths.leftTurnSignal,
+    };
+    updateLights(lights);
+}
+
+void handleLightWithoutBrakeMessage(unsigned char buffer[12])
+{
+    Lights currentLigths = getCurrentState().lights;
+
+    bool highBeam = buffer[1] == 0x10 || buffer[1] == 0x78;
+    bool lowBeam = buffer[1] == 0x68 || buffer[1] == 0x78;
+
+    bool leftTurnSignal = buffer[2] == 0x40 || buffer[2] == 0x60;
+    bool rightTurnSignal = buffer[2] == 0x20 || buffer[2] == 0x60;
+
+    Lights lights = {
+        .highBeam = highBeam,
+        .lowBeam = lowBeam,
+        .brake = currentLigths.brake,
+        .leftTurnSignal = leftTurnSignal,
+        .rightTurnSignal = rightTurnSignal,
+    };
+    updateLights(lights);
+}
+
+void handleTransmissionMessage(unsigned char buffer[12])
+{
+
+    short gear;
+    bool manual = buffer[1] == 0x04;
+    switch (buffer[2])
+    {
+    case 0x1E:
+        gear = 0;
+        break;
+    case 0x1C:
+        gear = -1;
+        break;
+    case 0x02:
+        gear = 1;
+        break;
+    case 0x04:
+        gear = 2;
+        break;
+    case 0x06:
+        gear = 3;
+        break;
+    case 0x08:
+        gear = 4;
+        break;
+    case 0x0A:
+        gear = 5;
+        break;
+    }
+
+    Transmission transmission = {
+        .manual = manual,
+        .gear = gear};
+    updateTransmission(transmission);
+}
+
+void handleDoorMessage(unsigned char buffer[12])
+{
+    byte state = buffer[1];
+    bool driver = (state & 0x4) != 0;
+    bool passenger = (state & 0x8) != 0;
+    bool trunk = (state & 0x40) != 0;
+    Doors doors = {
+        .driver = driver,
+        .passenger = passenger,
+        .trunk = trunk};
+
+    updateDoors(doors);
+}
+
 void handleMessage(unsigned long id, unsigned char length, unsigned char buffer[12])
 {
     switch (id)
     {
     case STEERING_WHEEL_CONTROL_ID:
-        handleSteeringWheelControls(buffer);
+        handleSteeringWheelControlsMessage(buffer);
         break;
-    default:
+    case BRAKE_ID:
+        handleBrakeMessage(buffer);
         break;
-    }
-}
-
-void handleMessageInDebugMode(unsigned long id, unsigned char length, unsigned char buffer[12])
-{
-
-    if (getSelectedIndex() > -1)
-    {
-        long unsigned int selectedId = getDiscoveredIds()[getSelectedIndex()];
-        if (selectedId == id)
-        {
-            bool isSameMessage = true;
-            for (int i = 0; i < length; i++)
-            {
-                if (buffer[i] != lastBuffer[i])
-                {
-                    isSameMessage = false;
-                    break;
-                }
-            }
-            if (!isSameMessage)
-                printMessage(id, length, buffer);
-
-            lastId = id;
-            lastLength = length;
-            for (int i = 0; i < length; i++)
-            {
-                lastBuffer[i] = buffer[i];
-            }
-        }
+    case LIGHT_ID:
+        handleLightWithoutBrakeMessage(buffer);
+        break;
+    case TRANSMISSION_ID:
+        handleTransmissionMessage(buffer);
+        break;
+    case DOOR_ID:
+        handleDoorMessage(buffer);
+        break;
     }
 }

@@ -18,12 +18,17 @@ State currentState = {
     .doors = {.driver = false, .passenger = false, .trunk = false, .lastChange = 0},
     .transmision = {.manual = false, .gear = 0, .lastChange = 0}};
 
+State getCurrentState()
+{
+    return currentState;
+}
+
 void printBool(bool value, bool withSeparator)
 {
-    Serial1.print(value ? "1" : "0");
+    Serial.print(value ? "1" : "0");
     if (withSeparator)
     {
-        Serial1.print("|");
+        Serial.print("|");
     }
 }
 
@@ -62,7 +67,7 @@ void updateSteeringwheelControls(SteeringWheelControls updated)
 
 void sendSteeringWheelControls()
 {
-    Serial1.print("SWC|");
+    Serial.print("SWC|");
     printBool(currentState.steeringWheelControls.leftUp, true);
     printBool(currentState.steeringWheelControls.leftMiddle, true);
     printBool(currentState.steeringWheelControls.leftDown, true);
@@ -73,7 +78,7 @@ void sendSteeringWheelControls()
     printBool(currentState.steeringWheelControls.voiceAssistant, true);
     printBool(currentState.steeringWheelControls.acceptCall, true);
     printBool(currentState.steeringWheelControls.endCall, false);
-    Serial1.println();
+    Serial.println();
 
     // TODO: improve commands
     if (currentState.steeringWheelControls.leftUp)
@@ -109,19 +114,26 @@ void updateLights(Lights updated)
 
     if (hasChanges)
     {
-        currentState.lights = updated;
+        currentState.lights = {
+            .highBeam = updated.highBeam,
+            .lowBeam = updated.lowBeam,
+            .brake = updated.brake,
+            .leftTurnSignal = updated.leftTurnSignal,
+            .rightTurnSignal = updated.rightTurnSignal,
+            .lastChange = millis()};
+        sendLights();
     }
 }
 
 void sendLights()
 {
-    Serial1.print("L|");
+    Serial.print("L|");
     printBool(currentState.lights.highBeam, true);
     printBool(currentState.lights.lowBeam, true);
     printBool(currentState.lights.brake, true);
     printBool(currentState.lights.leftTurnSignal, true);
     printBool(currentState.lights.rightTurnSignal, false);
-    Serial1.println();
+    Serial.println();
 }
 
 void updateDoors(Doors updated)
@@ -133,18 +145,22 @@ void updateDoors(Doors updated)
         state.trunk != updated.trunk;
     if (hasChanges)
     {
-        currentState.doors = updated;
+        currentState.doors = {
+            .driver = updated.driver,
+            .passenger = updated.passenger,
+            .trunk = updated.trunk,
+            .lastChange = millis()};
         sendDoors();
     }
 }
 
 void sendDoors()
 {
-    Serial1.print("D|");
+    Serial.print("D|");
     printBool(currentState.doors.driver, true);
     printBool(currentState.doors.passenger, true);
     printBool(currentState.doors.trunk, false);
-    Serial1.println();
+    Serial.println();
 }
 
 void updateTransmission(Transmission updated)
@@ -156,14 +172,19 @@ void updateTransmission(Transmission updated)
         state.gear != updated.gear;
     if (hasChanges)
     {
-        currentState.transmision = updated;
+        currentState.transmision = {
+            .manual = updated.manual,
+            .gear = updated.gear,
+            .lastChange = millis()};
         sendTransmission();
     }
 }
 
 void sendTransmission()
 {
-    Serial1.print("T|");
+    if (currentState.transmision.gear < 0)
+        openParkAssist();
+    Serial.print("T|");
     printBool(currentState.transmision.manual, true);
-    Serial1.println(currentState.transmision.gear);
+    Serial.println(currentState.transmision.gear);
 }

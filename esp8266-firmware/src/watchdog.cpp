@@ -5,9 +5,9 @@
 
 #define SWITCHOVER_DELAY 200
 
-#define CAN_NO_MESSAGES_TIMEOUT 10000
+#define CAN_NO_MESSAGES_TIMEOUT 5000
 
-#define SHUTDOWN_WAIT_TIME 120000
+#define SHUTDOWN_WAIT_TIME 10000
 
 long unsigned int shutdownAt = 0;
 
@@ -22,7 +22,7 @@ void changeToBattery()
     // Disconnect the accessory source
     digitalWrite(ACC_RELAY, LOW);
     // Notify running on battery
-    Serial1.println("S|running_on_battery");
+    Serial.println("S|running_on_battery");
 }
 
 void powerOff()
@@ -39,32 +39,21 @@ void setupPowerRelays()
     digitalWrite(ACC_RELAY, HIGH);
     pinMode(BATTERY_RELAY, OUTPUT);
     digitalWrite(BATTERY_RELAY, HIGH);
-    
 
     changeToBattery();
-}
-
-void cancelPowerOff()
-{
-    shutdownAt = 0;
-    Serial1.println("S|cancel_shutdown_request");
 }
 
 void keepAlive()
 {
     lastMessageMillis = millis();
-    if (shutdownAt > 0)
-    {
-        cancelPowerOff();
-    }
 }
 
 void watchdogLoop()
 {
 
-    if ((lastMessageMillis + CAN_NO_MESSAGES_TIMEOUT) < millis() && shutdownAt < 1)
+    if ((millis() - lastMessageMillis) > CAN_NO_MESSAGES_TIMEOUT && shutdownAt < 1)
     {
-        Serial1.println("S|shutdown_request");
+        Serial.println("S|shutdown_request");
         shutdownAt = millis() + SHUTDOWN_WAIT_TIME;
     }
     else if (shutdownAt > 0 && millis() > shutdownAt)

@@ -16,7 +16,7 @@ void keyboardLoop()
     {
         hasSentFirstCommand = true;
         delay(1000);
-        mediaPlayPause();
+        //mediaPlayPause();
     }
 }
 
@@ -59,15 +59,15 @@ void openHome()
 void openAssistant()
 {
     openHome();
-    delay(500);
-    bleKeyboard.write(KEY_F20);
+    delay(800);
+    bleKeyboard.write(KEY_F9);
 }
 
 void openParkAssist()
 {
     openHome();
-    delay(500);
-    bleKeyboard.write(KEY_F21);
+    delay(800);
+    bleKeyboard.write(KEY_F2);
 }
 
 void mute()

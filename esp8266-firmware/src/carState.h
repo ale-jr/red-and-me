@@ -1,5 +1,6 @@
 #pragma once
-typedef struct {
+typedef struct
+{
     bool leftUp;
     bool leftMiddle;
     bool leftDown;
@@ -13,7 +14,8 @@ typedef struct {
     unsigned long lastChange;
 } SteeringWheelControls;
 
-typedef struct {
+typedef struct
+{
     bool highBeam;
     bool lowBeam;
     bool brake;
@@ -22,27 +24,28 @@ typedef struct {
     unsigned long lastChange;
 } Lights;
 
-typedef struct {
+typedef struct
+{
     bool driver;
     bool passenger;
     bool trunk;
     unsigned long lastChange;
 } Doors;
 
-
-typedef struct {
+typedef struct
+{
     bool manual;
     short int gear;
     unsigned long lastChange;
 } Transmission;
 
-typedef struct {
+typedef struct
+{
     SteeringWheelControls steeringWheelControls;
     Lights lights;
     Doors doors;
     Transmission transmision;
 } State;
-
 
 void updateSteeringwheelControls(SteeringWheelControls steeringWheelControls);
 
@@ -56,3 +59,5 @@ void sendSteeringWheelControls();
 void sendLights();
 void sendDoors();
 void sendTransmission();
+
+State getCurrentState();
