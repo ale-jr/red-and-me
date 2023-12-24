@@ -1,78 +1,76 @@
 import { createWebsocket } from "./services/websocket.js";
 import { LOG_LEVEL, log } from "./services/log.js";
+import { rearViewCameraStream } from "./services/rearViewCameraStream.js";
 
 
+let currentStreamsCount = 0
 /**
- * @type {MediaStream}
- */
-let webcamStream = null
-
-const getWebCamStream = async () => {
-    if (webcamStream) return webcamStream
-    const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-            height: {
-                exact: 240
-            },
-            width: {
-                exact: 320
-            },
-            frameRate: {
-                ideal: 20
-            }
-        }
-    })
-    webcamStream = stream
-    return webcamStream
-}
-
-
-/**
- * 
- * @param {RTCSessionDescriptionInit} offer 
- * @param {string} connectionId 
+ *
+ * @param {RTCSessionDescriptionInit} offer
+ * @param {string} connectionId
  */
 const replyStreamRequest = async (offer, connectionId) => {
-    log(LOG_LEVEL.INFO, "Answer stream request")
-    const connection = new RTCPeerConnection({
-        iceServers: []
-    })
+  log(LOG_LEVEL.INFO, "Answer stream request");
+  const connection = new RTCPeerConnection({
+    iceServers: [],
+  });
 
-    connection.onconnectionstatechange = (event) => {
-        const state = connection.connectionState
-        log(LOG_LEVEL.DEBUG, "RTCPeerConnection state change", state)
+  connection.onconnectionstatechange = (event) => {
+    const state = connection.connectionState;
+    log(LOG_LEVEL.DEBUG, "RTCPeerConnection state change", state);
 
+    if (state === "connected") {
+      currentStreamsCount++;
     }
-
-    connection.oniceconnectionstatechange = (event) => log(LOG_LEVEL.DEBUG, "RTCPeerConnection ice state change", connection.iceConnectionState)
-
-    connection.onicecandidate = (event) => {
-        log(LOG_LEVEL.DEBUG, "RTCPeerConnection on ice candidate", event)
-        if (!event.candidate) {
-            sendMessage({
-                type: "camera-stream-reply",
-                payload: connection.localDescription,
-                connectionId
-            })
-        }
+    else if (state === 'disconnected') {
+      currentStreamsCount--;
+      if (currentStreamsCount < 1)
+        rearViewCameraStream.stopStream()
     }
+  };
 
-    await connection.setRemoteDescription(offer)
+  connection.oniceconnectionstatechange = (event) =>
+    log(
+      LOG_LEVEL.DEBUG,
+      "RTCPeerConnection ice state change",
+      connection.iceConnectionState
+    );
 
-    const webcamStream = await getWebCamStream()
-    webcamStream.getTracks().forEach(track => connection.addTrack(track, webcamStream))
+  connection.onicecandidate = (event) => {
+    log(LOG_LEVEL.DEBUG, "RTCPeerConnection on ice candidate", event);
+    if (!event.candidate) {
+      sendMessage({
+        type: "camera-stream-reply",
+        payload: connection.localDescription,
+        connectionId,
+      });
+    }
+  };
 
-    const answer = await connection.createAnswer()
-    await connection.setLocalDescription(answer)
+  await connection.setRemoteDescription(offer);
 
-}
+  const stream = await rearViewCameraStream.startStream();
+  stream.getTracks().forEach((track) => connection.addTrack(track, stream));
 
+  const answer = await connection.createAnswer();
+  await connection.setLocalDescription(answer);
+};
 
 const { sendMessage } = createWebsocket({
-    onMessage: (message) => {
-        if (message.type === "camera-stream-request")
-            replyStreamRequest(message.payload, message.connectionId);
-    }
-})
+  onMessage: (message) => {
+    if (message.type === "camera-stream-request")
+      replyStreamRequest(message.payload, message.connectionId);
+  },
+});
 
+onerror = (event, source, lineno, colno, error) => {
+  sendMessage({
+    err: {
+      event,
+      source,
+      lineno,
+      colno,
+      error,
+    },
+  });
+};

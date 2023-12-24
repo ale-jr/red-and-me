@@ -6,6 +6,11 @@ import { createWebRTCReceiver } from "../services/webrtcReceiver.js";
 
 const template = document.createElement("template");
 
+const THRESHOLDS = {
+  WARNING: 50,
+  DANGER: 20
+}
+
 template.innerHTML = `
 ${styleTags}
 <style>
@@ -16,17 +21,24 @@ ${styleTags}
     transform: translate(-50%, -50%);
     box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.75);
     background-color: var(--card-bg);
-    padding: 8px;
+    padding: 16px;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content:space-between;
+
   }
 
   .camera-modal .close {
     all: unset;
     color: #ffffff;
-    font-size: 2rem;
+    font-size: 3.5rem;
     font-weight: bolder;
     position: fixed;
-    top: -1rem;
-    right: -1rem;
+    top: 0rem;
+    right: 0.5rem;
   }
 
   .backdrop {
@@ -47,13 +59,6 @@ ${styleTags}
     width: 100%;
   }
 
-  #camera-overlay {
-    position: absolute;
-    top: 8px;
-    bottom: 8px;
-    left: 8px;
-    right: 8px;
-  }
 
 
   .stage{
@@ -65,10 +70,56 @@ ${styleTags}
     position: absolute;
   }
 
+  .sensors{
+
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  } 
+
+  .sensors .car, .sensors .sensor-values{
+      width: 200px;
+  }
+
+  .sensors .sensor-values {
+    display: flex;
+    justify-content:center;
+    gap: 44px;
+    font-size: 32px;
+
+  }
+
+  .sensors .sensor-values small {
+    font-size: 16px;
+  }
+
+  .sensors .sensor-values .warning{
+    color: orange;
+  }
+
+  .sensors .sensor-values div {
+    flex-grow:0;
+    flex-shrink: 0;
+    width: 80px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .sensors .sensor-values .danger{
+    color: red;
+  }
+
+
+
+
+
 
 </style>
 <button class="card card-button" id="parking-card">
-<i class="fa-solid fa-car"></i> Park assist
+  <i class="fa-solid fa-car"></i> Park assist
 </button>
 <div class="backdrop closed"></div>
 <div class="camera-modal closed">
@@ -76,12 +127,24 @@ ${styleTags}
     <div class="stage">
       <video autoplay id="camera-stream"></video>
     </div>
-    <canvas id="camera-overlay"></canvas>
+    <div class="sensors">
+      <div class="sensor-values" id="front-sensors">
+        <div class="warning"><span>300</span><small>cm</small></div>
+        <div class="danger"><span>300</span><small>cm</small></div>
+        <div><span>300</span><small>cm</small></div>
+      </div>
+      <img src="assets/img/car-top-view.png" class="car" />
+      <div class="sensor-values" id="rear-sensors">
+        <div><span>300</span><small>cm</small></div>
+        <div><span>300</span><small>cm</small></div>
+        <div><span>300</span><small>cm</small></div>
+      </div>
+    </div>
 </div>
 </div>
 `;
 
-class CameraWidget extends HTMLElement {
+class ParkingWidget extends HTMLElement {
   /**
    * @type {import("../services/webrtcReceiver.js").WebRTCReceiver}
    */
@@ -118,10 +181,37 @@ class CameraWidget extends HTMLElement {
           const gear = message.state?.transmission?.gear
           if (gear === -1)
             this.showCamera();
-
+          this.updateSensors(message.state.proximity)
           break;
+
       }
     });
+
+  }
+
+  updateSensors = ({ front, rear }) => {
+
+
+    const applyLimits = (element, value) => {
+      if (value <= THRESHOLDS.DANGER) {
+        element.className = 'danger'
+      }
+      else if (value <= THRESHOLDS.WARNING) {
+        element.className = 'warning'
+      }
+      else {
+        element.className = ''
+      }
+      element.querySelector("span").innerText = value >= 999 ? '-' : value
+    }
+
+    this.shadowRoot.querySelector("#front-sensors").querySelectorAll("div").forEach((element, index) => {
+      applyLimits(element, front[index])
+    })
+
+    this.shadowRoot.querySelector("#rear-sensors").querySelectorAll("div").forEach((element, index) => {
+      applyLimits(element, rear[index])
+    })
 
   }
 
@@ -178,7 +268,7 @@ class CameraWidget extends HTMLElement {
     video.style.height = `${cameraSettings.height}px`;
     video.style.width = `${cameraSettings.width}px`;
 
-    video.style.transform = `scale(${cameraSettings.scale}) translateX(${cameraSettings.x}px) translateY(${cameraSettings.y}px) rotate(${cameraSettings.rotate}deg)`;
+    video.style.transform = `scaleX(-1) scale(${cameraSettings.scale}) translateX(${cameraSettings.x}px) translateY(${cameraSettings.y}px) rotate(${cameraSettings.rotate}deg)`;
   }
 
   /**
@@ -251,4 +341,4 @@ class CameraWidget extends HTMLElement {
   };
 }
 
-window.customElements.define("parking-widget", CameraWidget);
+window.customElements.define("parking-widget", ParkingWidget);

@@ -7,13 +7,10 @@ import { v4 as randomId } from "uuid";
 import { cameraStream } from "./services/cameraStream.js";
 import { consts } from "./consts/index.js";
 import dirname from "./consts/dirname.cjs";
-import { tabletConnection } from "./services/tabletConnection.js";
-import { carConnection } from "./services/carConnection.js";
+import { state, startEvents } from './services/carEventsService.js'
 const fastify = Fastify({
   logger: true,
 });
-
-console.log("dirname()", dirname());
 
 fastify.register(fastifyStatic, {
   root: path.join(dirname(), "..", "public"),
@@ -49,11 +46,15 @@ fastify.get("/camera-stream", function handler(request, reply) {
   reply.sendFile("camera-stream.html", { cacheControl: false });
 });
 
+fastify.get('/state', function handler(request, reply) {
+  reply.send(state);
+})
+
 const start = async () => {
   try {
     await fastify.listen({ port: consts.SERVER_PORT, host: "0.0.0.0" });
     cameraStream.start();
-    tabletConnection.connect();
+    startEvents();
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

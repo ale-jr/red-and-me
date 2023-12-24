@@ -69,11 +69,17 @@ public class MainActivity extends AppCompatActivity {
 
         this.webViewInterface = new WebViewInterface(this);
         webView.addJavascriptInterface(this.webViewInterface,"Android");
+
+        this.authorizeSpotify();
     }
 
     @Override
     protected void onResume(){
         super.onResume();
+        this.authorizeSpotify();
+    }
+
+    private void authorizeSpotify(){
         ConnectionParams connectionParams = new ConnectionParams.Builder((CLIENT_ID))
                 .setRedirectUri(REDIRECT_URI)
                 .showAuthView(true)

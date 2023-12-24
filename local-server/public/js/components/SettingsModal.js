@@ -149,7 +149,7 @@ class SettingsModal extends HTMLElement {
     const rotate = +this.shadowRoot.querySelector("#camera-rotate-input").value;
     localStorage.setItem(
       "camera-settings",
-      JSON.parse({
+      JSON.stringify({
         height,
         width,
         scale,

@@ -1,5 +1,3 @@
-import { carConnection } from "./carConnection.js";
-export let debugMode = false;
 
 /**
  * @typedef {Object} Message
@@ -20,20 +18,7 @@ export const onMessage = (message, socket, clientId) => {
 
   try {
     const { type, command } = JSON.parse(message);
-
-    switch (type) {
-      case "enable-debug":
-        debugMode = true;
-        break;
-      case "disable-debug":
-        debugMode = false;
-        break;
-      case "send-command":
-        if (debugMode) {
-          carConnection.sendMessage(command);
-        }
-        break;
-    }
+    //TODO: do something
   } catch (e) {
     console.error("e", e);
   }
@@ -73,7 +58,8 @@ export const onDisconnect = (socket, clientId) => {
  * @param {Object} message
  */
 export const sendToAll = (message) => {
+  const stringifiedMessage = JSON.stringify(message)
   Object.entries(sockets).forEach(([_, socket]) => {
-    socket.send(JSON.stringify(message));
+    socket.send(stringifiedMessage);
   });
 };

@@ -1,5 +1,5 @@
 import { startWidgets } from "./components/widgets.js";
-import "./components/CameraWidget.js";
+import "./components/ParkingWidget.js";
 import "./components/NavigationWidget/index.js";
 import "./components/SettingsModal.js";
 import "./components/NavigationItem.js";

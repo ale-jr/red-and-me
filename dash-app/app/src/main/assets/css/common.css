@@ -137,6 +137,8 @@ li {
   background-color: var(--card-bg);
   padding: 16px;
   min-width: 200px;
+  max-height: 90vh;
+  overflow: auto;
 }
 
 .modal .modal-header {

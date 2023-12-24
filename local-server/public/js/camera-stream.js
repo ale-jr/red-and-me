@@ -2,6 +2,8 @@ import { createWebsocket } from "./services/websocket.js";
 import { LOG_LEVEL, log } from "./services/log.js";
 import { rearViewCameraStream } from "./services/rearViewCameraStream.js";
 
+
+let currentStreamsCount = 0
 /**
  *
  * @param {RTCSessionDescriptionInit} offer
@@ -16,6 +18,15 @@ const replyStreamRequest = async (offer, connectionId) => {
   connection.onconnectionstatechange = (event) => {
     const state = connection.connectionState;
     log(LOG_LEVEL.DEBUG, "RTCPeerConnection state change", state);
+
+    if (state === "connected") {
+      currentStreamsCount++;
+    }
+    else if (state === 'disconnected') {
+      currentStreamsCount--;
+      if (currentStreamsCount < 1)
+        rearViewCameraStream.stopStream()
+    }
   };
 
   connection.oniceconnectionstatechange = (event) =>

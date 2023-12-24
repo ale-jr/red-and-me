@@ -1,3 +1,6 @@
-import { tabletConnection, KEYS } from "./services/tabletConnection.js";
+import { carEventEmitter } from "./services/carEventsService.js";
 
-tabletConnection.sendKey(KEYS.playPause);
+
+carEventEmitter.addListener('gps', (data) => {
+    console.log('gps', data)
+})

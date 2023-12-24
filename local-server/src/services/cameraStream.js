@@ -6,7 +6,7 @@ export const createCameraStream = () => {
     //Remove old chrome locks
     try {
       execSync(`rm -rf ${consts.CHROMIUM_LOCK_FILE_PATH}`);
-    } catch (e) {}
+    } catch (e) { }
 
     const chromeCommand = spawn(consts.CHROMIUM_PATH, [
       "--use-fake-ui-for-media-stream",
