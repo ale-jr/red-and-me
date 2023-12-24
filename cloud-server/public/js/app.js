@@ -1,3 +1,4 @@
+import { createWebsocket } from "./websocket.js";
 document.addEventListener("DOMContentLoaded", () => {
   const hasCredentials = localStorage.getItem("credentials");
   const loginSection = document.querySelector("#login-section");
@@ -117,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((e) => {
         alert(`Erro ao buscar: ${e.message}`)
       })
-      .finally(()=> {
+      .finally(() => {
         btnEl.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i>`;
       })
   });
@@ -139,6 +140,23 @@ document.addEventListener("DOMContentLoaded", () => {
     .addEventListener("click", () => {
       closeAddRouteModal();
     });
+
+
+  renderTrackingMap();
+  document.querySelector("#refresh-position").addEventListener("click", () => {
+    fetchTracking()
+  })
+
+  createWebsocket({
+    device: 'pwa',
+    onMessage: (data) => {
+      if (data.type === "positionChange") {
+        carLat = data.point.lat
+        carLng = data.point.lat
+        carSpeed = data.point.speed
+      }
+    },
+  })
 });
 
 const addNewRoutePlanning = (lat, lng, name, button) => {
@@ -289,3 +307,133 @@ const closeAddRouteModal = () => {
   document.querySelector("#route-modal-backdrop").classList.add("hidden");
   document.querySelector("#route-modal").classList.add("hidden");
 };
+
+
+let map;
+const userIcon = L.icon({
+  iconUrl: 'assets/vectors/location-dot-solid.svg',
+  className: 'user-icon',
+  iconSize: [30, 50],
+  iconAnchor: [15, 45],
+  shadowAnchor: [0, 0],
+  popupAnchor: [0, 0]
+});
+
+const carIcon = L.icon({
+  iconUrl: 'assets/vectors/car-side-solid.svg',
+  className: 'user-icon',
+  iconSize: [30, 50],
+  iconAnchor: [15, 25],
+  shadowAnchor: [0, 0],
+  popupAnchor: [0, -20]
+});
+const renderTrackingMap = () => {
+
+  map = L.map('map-tracking').setView([-23.6705902, -46.5387023], 15)
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+
+  fetchTracking()
+}
+
+
+
+const fetchTracking = async () => {
+  const errorElement = document.querySelector("#error-text");
+
+
+  const position = await getCurrentPosition()
+  const headers = new Headers();
+  headers.append("token", localStorage.getItem("credentials"));
+
+  const init = {
+    method: "GET",
+    headers,
+  };
+
+  const url = new URL(`${window.location.origin}/tracking/last`);
+
+  url.searchParams.append('lat', position.latitude)
+  url.searchParams.append('lng', position.longitude)
+
+
+  await fetch(new Request(url), init)
+    .then((r) => {
+      if (r.ok) {
+        return r.json();
+      } else {
+        throw new Error("erro ao executar busca");
+      }
+    })
+    .then(({ point, eta: { duration } }) => {
+      carLat = point.lat;
+      carLng = point.lng;
+      carSpeed = point.speed * 3.6
+
+      eta = Date.now() + (duration * 1000)
+
+    })
+    .catch((e) => {
+      errorElement.innerText = e;
+      errorElement.classList.remove("hidden");
+    });
+
+  updateTrackingMapPosition(true)
+}
+
+/**
+ * Get user current location
+ * @function
+ * @returns {Promise<{latitude: number, longitude: number, accuracy: number}>} 
+ */
+const getCurrentPosition = () => new Promise((resolve) => {
+  navigator.geolocation.getCurrentPosition((position) => {
+    resolve({
+      accuracy: position.coords.accuracy,
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+
+    })
+  })
+})
+
+
+
+
+let userPositionMarker = null
+let carPositionMarker = null
+let carLat = null;
+let carLng = null
+let carSpeed = 0;
+let eta = null
+const updateTrackingMapPosition = async (fitToMap = false) => {
+
+  if (!carPositionMarker) {
+    carPositionMarker = L.marker([carLat, carLng], { icon: carIcon }).addTo(map)
+      .bindPopup(`Velocidade: ${carSpeed}km/h<br/>Chegada ás ${new Date(eta).toLocaleString()}`)
+  }
+  else {
+    carPositionMarker.setLatLng([carLat, carLng])
+    carPositionMarker.unbindPopup()
+    carPositionMarker.bindPopup(`Velocidade: ${carSpeed}km/h<br/>Chegada ás ${new Date(eta).toLocaleString()}`)
+  }
+
+  const currentPosition = await getCurrentPosition()
+
+  if (!userPositionMarker) {
+    userPositionMarker = L.marker([currentPosition.latitude, currentPosition.longitude], { icon: userIcon }).addTo(map)
+  }
+  else {
+    userPositionMarker.setLatLng([currentPosition.latitude, currentPosition.longitude])
+  }
+
+
+  if (fitToMap) {
+    const group = L.featureGroup([carPositionMarker, userPositionMarker]);
+    map.fitBounds(group.getBounds())
+  }
+
+}

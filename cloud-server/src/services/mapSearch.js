@@ -30,10 +30,32 @@ const createMapSearchService = () => {
 
         return items;
       });
+
+
+
   };
 
+  const getETA = (origin, destination) => {
+    const url = `https://router.hereapi.com/v8/routes`
+
+    return axios.get(url, {
+      params: {
+        apiKey: HERE_KEY,
+        transportMode: 'car',
+        origin: `${origin.lat},${origin.lng}`,
+        destination: `${destination.lat},${destination.lng}`,
+        return: 'summary'
+      }
+    }).then(({ data }) => {
+      return data.routes[0].sections[0].summary
+    })
+
+  }
+
+  //?transportMode=car&origin=52.5308,13.3847&destination=52.5323,13.3789&return=summary&apikey=byG0v6gZ2ffCIROa3elC44bTuWYMGQU4VuSXpRw8wKU
   return {
     search,
+    getETA
   };
 };
 

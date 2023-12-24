@@ -15,6 +15,7 @@ main {
 .card-title {
   display: flex;
 }
+
 .card-title span {
   flex-grow: 1;
 }
@@ -67,6 +68,7 @@ ul.route-list {
   padding: 0;
   margin: 0;
 }
+
 .route-list li {
   list-style: none;
   display: flex;
@@ -78,6 +80,7 @@ ul.route-list {
   border-bottom: 1px solid var(--header-text);
   margin-bottom: 12px;
 }
+
 .route-list li .title {
   margin: 0;
   font-size: 1.2rem;
@@ -90,4 +93,16 @@ ul.route-list {
 
 .route-list li .actions {
   margin-bottom: 8px;
+}
+
+
+.map-container {
+  width: 100%;
+  height: 500px;
+
+}
+
+
+.user-icon {
+  color: red;
 }
